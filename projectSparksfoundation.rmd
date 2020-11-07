@@ -1,0 +1,82 @@
+---
+title: "Project1TheSparksFoundation.rmd"
+author: "sourabh jain"
+date: "07/11/2020"
+output: html_document
+---
+
+### Loading the file and libraries
+```{r}
+library(ggplot2)
+library(caret)
+studentscore<-read.csv("student_score.csv")
+```
+
+### Exploring the given data
+```{r}
+# First 6 values
+head(studentscore)
+# Structure of the given data
+str(studentscore)
+#The given data has two parameters 1. Hours and 2. Scores 
+
+#Dimension of the given data
+dim(studentscore)
+#Thus we have 25 rows and 2 columns
+``` 
+
+### Exploratory Analysis
+```{r}
+#Scatter plot
+g<-ggplot(data=studentscore,aes(x=Hours,y=Scores))
+g<-g+geom_point(size=2,color="steelblue")+labs(title = "Scores vs Hours Graph")
+g
+```
+
+### Dividing into Training and test
+```{r}
+# I'll divide the data into 75% training and 25% testing using the caret package
+inTrain<-createDataPartition(y=studentscore$Scores,p=0.75,list=FALSE)
+train<-studentscore[inTrain,]
+test<-studentscore[-inTrain,]
+dim(train)
+dim(test)
+```
+
+### Linear Regression and model fitting
+```{r}
+g<-ggplot(data=train,aes(x=Hours,y=Scores))+labs(title = "Scores vs Hours Graph")
+g<-g+geom_point(size=2,col="steelblue")
+#ploting the regression line
+g<-g+geom_smooth(method = "lm", color="black",se=FALSE)
+g
+
+# Model Fitting
+fit<-lm(Scores~Hours,data=train)
+coef(fit) #Thus we expect 9.8 Score increase with every increase in hour 
+summary(fit)$coef
+```
+
+### Testing the model
+```{r}
+PredictedTestValues<-predict(fit,newdata = test)
+
+# Table of Actual vs predictive values
+df<-data.frame(Actual=test$Scores,predicted=PredictedTestValues)
+df
+
+#Predicting the score at hours=9.25
+predict(fit,newdata = data.frame(Hours=9.25))
+```
+
+### Evaluating The model
+```{r}
+# Calculating RMSE
+RMSE(PredictedTestValues,test$Scores)
+# Calculating R-square
+R2(PredictedTestValues,test$Scores)
+
+
+
+
+ 
